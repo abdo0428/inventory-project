@@ -1,115 +1,89 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="card p-3 mb-3">
-    <div class="d-flex align-items-center justify-content-between">
-        <div>
-            <h5 class="mb-1">عمليات المخزون (Stock In/Out)</h5>
-            <div class="text-muted small">إضافة/سحب مخزون مع منع السحب الزائد وتسجيل قبل/بعد</div>
-        </div>
-        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalTx">
-            + إضافة عملية
-        </button>
+@php($breadcrumbs = [['title' => __('ui.Transactions'), 'url' => route('transactions.index')]])
+
+<section class="panel mb-4 d-flex justify-content-between align-items-center gap-3 flex-wrap">
+    <div>
+        <h1 class="h4 mb-1">{{ __('ui.Stock Transactions') }}</h1>
+        <p class="text-muted mb-0">{{ __('ui.Manage inventory movements with stock in/out operations, quantity tracking, and transaction history') }}</p>
     </div>
+    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalTx">{{ __('ui.Add Transaction') }}</button>
+</section>
+
+<div class="metric-grid">
+    <article class="metric-card"><p class="metric-label">{{ __('ui.Total Transactions') }}</p><p class="metric-value">{{ number_format($transactions->total()) }}</p></article>
+    <article class="metric-card"><p class="metric-label">{{ __('ui.Stock In') }}</p><p class="metric-value">{{ number_format($transactions->getCollection()->where('type', 'IN')->count()) }}</p></article>
+    <article class="metric-card"><p class="metric-label">{{ __('ui.Stock Out') }}</p><p class="metric-value">{{ number_format($transactions->getCollection()->where('type', 'OUT')->count()) }}</p></article>
+    <article class="metric-card"><p class="metric-label">{{ __('ui.Quantity') }}</p><p class="metric-value">{{ number_format($transactions->getCollection()->sum('qty')) }}</p></article>
 </div>
 
-<div class="card p-3">
+<div class="table-wrap mb-4">
     <div class="table-responsive">
-        <table id="txTable" class="table table-striped table-hover align-middle">
+        <table id="txTable" class="table table-hover align-middle mb-0">
             <thead>
-            <tr>
-                <th>#</th>
-                <th>التاريخ</th>
-                <th>المنتج</th>
-                <th>النوع</th>
-                <th>الكمية</th>
-                <th>قبل</th>
-                <th>بعد</th>
-                <th>ملاحظة</th>
-            </tr>
+                <tr>
+                    <th>#</th>
+                    <th>{{ __('ui.Date & Time') }}</th>
+                    <th>{{ __('ui.Product') }}</th>
+                    <th>{{ __('ui.Type') }}</th>
+                    <th>{{ __('ui.Quantity') }}</th>
+                    <th>{{ __('ui.Before') }}</th>
+                    <th>{{ __('ui.After') }}</th>
+                    <th>{{ __('ui.Note') }}</th>
+                </tr>
             </thead>
             <tbody>
-            @foreach($transactions as $t)
-                <tr>
-                    <td>{{ $t->id }}</td>
-                    <td>{{ $t->created_at->format('Y-m-d H:i') }}</td>
-                    <td>{{ $t->product?->name }} <span class="text-muted">({{ $t->product?->sku }})</span></td>
-                    <td>
-                        @if($t->type === 'IN')
-                            <span class="badge text-bg-success">IN</span>
-                        @else
-                            <span class="badge text-bg-danger">OUT</span>
-                        @endif
-                    </td>
-                    <td class="fw-bold">{{ $t->qty }}</td>
-                    <td>{{ $t->before_qty }}</td>
-                    <td>{{ $t->after_qty }}</td>
-                    <td class="text-muted">{{ $t->note }}</td>
-                </tr>
-            @endforeach
+                @foreach($transactions as $t)
+                    <tr>
+                        <td>{{ $t->id }}</td>
+                        <td>{{ $t->created_at->format('Y-m-d H:i') }}</td>
+                        <td>{{ $t->product?->name }} <small class="text-muted">{{ $t->product?->sku }}</small></td>
+                        <td><span class="badge-soft {{ $t->type === 'IN' ? 'ok' : 'danger' }}">{{ $t->type }}</span></td>
+                        <td>{{ number_format($t->qty) }}</td>
+                        <td>{{ number_format($t->before_qty) }}</td>
+                        <td>{{ number_format($t->after_qty) }}</td>
+                        <td>{{ $t->note ?: '-' }}</td>
+                    </tr>
+                @endforeach
             </tbody>
         </table>
     </div>
+    @if($transactions->hasPages())
+        <div class="p-3 border-top">{{ $transactions->links() }}</div>
+    @endif
 </div>
 
-<!-- Tx Modal -->
 <div class="modal fade" id="modalTx" tabindex="-1">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content" style="border-radius:16px">
-      <div class="modal-header">
-        <h5 class="modal-title">إضافة عملية مخزون</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-
-      <form method="POST" action="{{ route('transactions.store') }}">
-        @csrf
-        <div class="modal-body">
-            <div class="row g-3">
-                <div class="col-md-8">
-                    <label class="form-label">المنتج</label>
-                    <select name="product_id" class="form-select" required>
-                        <option value="" disabled selected>اختر منتج...</option>
-                        @foreach($products as $p)
-                            <option value="{{ $p->id }}">
-                                {{ $p->name }} ({{ $p->sku }}) — المتوفر: {{ $p->quantity }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="col-md-4">
-                    <label class="form-label">النوع</label>
-                    <select name="type" class="form-select" required>
-                        <option value="IN">Stock IN</option>
-                        <option value="OUT">Stock OUT</option>
-                    </select>
-                </div>
-
-                <div class="col-md-4">
-                    <label class="form-label">الكمية</label>
-                    <input name="qty" type="number" min="1" class="form-control" required>
-                </div>
-
-                <div class="col-md-8">
-                    <label class="form-label">ملاحظة</label>
-                    <input name="note" class="form-control" placeholder="سبب العملية / رقم فاتورة ...">
-                </div>
-
-                <div class="col-12">
-                    <div class="alert alert-info mb-0">
-                        ملاحظة: عند اختيار <b>OUT</b> سيتم منع سحب كمية أكبر من المتوفر.
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <form method="POST" action="{{ route('transactions.store') }}">
+                @csrf
+                <div class="modal-header"><h5 class="modal-title">{{ __('ui.Add Stock Transaction') }}</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body row g-3">
+                    <div class="col-md-12">
+                        <label class="form-label">{{ __('ui.Select Product') }}</label>
+                        <select name="product_id" class="form-select" required>
+                            <option value="">{{ __('ui.Choose a product...') }}</option>
+                            @foreach($products as $p)
+                                <option value="{{ $p->id }}">{{ $p->name }} ({{ $p->sku }}) - {{ __('ui.Available') }}: {{ $p->quantity }}</option>
+                            @endforeach
+                        </select>
                     </div>
+                    <div class="col-md-6">
+                        <label class="form-label">{{ __('ui.Transaction Type') }}</label>
+                        <select name="type" class="form-select" required>
+                            <option value="IN">{{ __('ui.Stock In') }}</option>
+                            <option value="OUT">{{ __('ui.Stock Out') }}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6"><label class="form-label">{{ __('ui.Quantity') }}</label><input type="number" min="1" name="qty" class="form-control" required></div>
+                    <div class="col-md-12"><label class="form-label">{{ __('ui.Note (Optional)') }}</label><input name="note" class="form-control"></div>
                 </div>
-            </div>
+                <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">{{ __('ui.Cancel') }}</button><button class="btn btn-success">{{ __('ui.Record Transaction') }}</button></div>
+            </form>
         </div>
-
-        <div class="modal-footer">
-          <button class="btn btn-light" type="button" data-bs-dismiss="modal">إلغاء</button>
-          <button class="btn btn-success" type="submit">تسجيل العملية</button>
-        </div>
-      </form>
     </div>
-  </div>
 </div>
 @endsection
 
@@ -117,15 +91,10 @@
 <script>
 $(function () {
     $('#txTable').DataTable({
-        pageLength: 10,
+        pageLength: 20,
         order: [[0, 'desc']],
-        language: {
-            search: "بحث:",
-            lengthMenu: "عرض _MENU_",
-            info: "عرض _START_ إلى _END_ من _TOTAL_",
-            paginate: { next: "التالي", previous: "السابق" },
-            zeroRecords: "لا يوجد نتائج",
-        }
+        dom: 'Bfrtip',
+        buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
     });
 });
 </script>

@@ -10,9 +10,14 @@ class Product extends Model
         'sku', 'name', 'description', 'quantity', 'low_stock_threshold',
     ];
 
-    public function transactions()
+    public function stockTransactions()
     {
         return $this->hasMany(StockTransaction::class);
+    }
+
+    public function transactions()
+    {
+        return $this->stockTransactions();
     }
 
     public function getIsLowStockAttribute(): bool
