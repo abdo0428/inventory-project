@@ -17,9 +17,15 @@
 </section>
 
 <div class="metric-grid">
-    <article class="metric-card"><p class="metric-label">{{ __('ui.Total Products') }}</p><p class="metric-value">{{ number_format($products->total()) }}</p></article>
-    <article class="metric-card"><p class="metric-label">{{ __('ui.Low Stock Items') }}</p><p class="metric-value">{{ number_format($lowCount) }}</p></article>
-    <article class="metric-card"><p class="metric-label">{{ __('ui.Out of Stock') }}</p><p class="metric-value">{{ number_format($products->getCollection()->where('quantity', 0)->count()) }}</p></article>
+    <article class="metric-card"><p class="metric-label">{{ __('ui.Total Products') }}</p> 
+        <p class="metric-value">{{ number_format($products->total()) }}</p>
+    </article>
+    <article class="metric-card"><p class="metric-label">{{ __('ui.Low Stock Items') }}</p>
+        <p class="metric-value">{{ number_format($lowCount) }}</p>
+    </article>
+    <article class="metric-card"><p class="metric-label">{{ __('ui.Out of Stock') }}</p>   
+        <p class="metric-value">{{ number_format($products->getCollection()->where('quantity', 0)->count()) }}</p>
+    </article>
 </div>
 
 <section class="panel mb-4">

@@ -18,3 +18,4 @@ return [
     'throttle' => 'Too many login attempts. Please try again in :seconds seconds.',
 
 ];
+//this file is for authentication language lines, so i will not add any code here, but in future if i need to add any code that is common for all authentication language lines, i will add it here.

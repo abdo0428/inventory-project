@@ -7,6 +7,23 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+<style>
+    .auth-btn {
+        width: 400px;
+        height: 35px;
+        background:linear-gradient(145deg,#0f6cbd,#17a773);
+        color:rgb(250, 250, 250);
+        gap: 5rem;
+        margin: 15px;
+        border: 1px solid rgb(34, 65, 100);
+        border-radius: 20px 10px 10px 20px;
+        text-align: center;
+    
+
+    }
+</style>
+
 </head>
 <body class="app-shell">
     <div class="app-bg"></div>
@@ -50,12 +67,14 @@
                     </div>
 
                     @auth
-                        <a class="btn btn-primary" href="{{ route('dashboard') }}">{{ __('ui.dashboard') }}</a>
-                    @else
+                       <div class="auth-btn"><a class="btn btn-primary" href="{{ route('dashboard') }}">{{ __('ui.dashboard') }}</a>
+                   </div>  @else
                         <div class="d-flex flex-wrap gap-2">
-                            <a class="btn btn-primary" href="{{ route('login') }}">{{ __('ui.log_in') }}</a>
-                            <a class="btn btn-outline-primary" href="{{ route('register') }}">{{ __('ui.register') }}</a>
-                        </div>
+                            <div class="auth-btn"><a class="btn btn-primary" href="{{ route('login') }}">{{ __('ui.log_in') }}</a>
+                           </div>
+                           <div class="auth-btn"> <a class="btn btn-outline-primary" href="{{ route('register') }}">{{ __('ui.register') }}</a>
+                       </div> 
+                    </div>
                     @endauth
                 </article>
 

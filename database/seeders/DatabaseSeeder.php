@@ -27,3 +27,4 @@ class DatabaseSeeder extends Seeder
 
     }
 }
+//this file is for seeding the database, so i will not add any code here, but in future if i need to add any code that is common for all seeders, i will add it here.

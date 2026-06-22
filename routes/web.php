@@ -54,3 +54,4 @@ Route::prefix('{locale}')
 
     require __DIR__.'/auth.php';
 });
+//this file is for defining the web routes, so i will not add any code here, but in future if i need to add any code that is common for all routes, i will add it here.
